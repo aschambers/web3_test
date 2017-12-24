@@ -10,6 +10,7 @@
 	<div class="container">
 		<h1>Course Instructor</h1>
 		<h2 id="instructor"></h2>
+		<img id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
 
 		<label for="name" class="col-lg-2 control-label">Instructor Name</label>
 		<input id="name" type="text">
@@ -67,6 +68,23 @@
 				"payable": false,
 				"stateMutability": "view",
 				"type": "function"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"name": "age",
+						"type": "uint256"
+					}
+				],
+				"name": "Instructor",
+				"type": "event"
 			}
 		]);
 		// if address is not in quotes, an error will occur.. web3.min.js:1 Uncaught Error: invalid address
@@ -75,19 +93,25 @@
 		// you then need to attach in the remix browser by selecting web3 provider from the drop-down menu in the run tab
 		// in the real environment, this is not instantanious like in the test enviornment with remix browser
 		// the value is obtained by copy pasting the address of the contract in remix in the run tab after creating the contract
-		var myCourseContract = course_contract.at("0xf5948f47d838ac912c845a71d7f5df7d42fd30c8");
+		var myCourseContract = course_contract.at("0xd72e1aa6fd9048cc2e56ebac940e7b5d2821bdc7");
 		console.log(myCourseContract);
 
-		myCourseContract.getInstructor(function(error, result) {
+		var InstructorEvent = myCourseContract.Instructor();
+
+		// watch event and update upon change in browser
+		InstructorEvent.watch(function(error, result) {
 			if(!error) {
-				$('#instructor').html(result[0]+' ('+result[1]+' years old)');
+				$('#loader').hide();
+				$('#instructor').html(result.args.name + ' (' + result.args.age + ' years old)');
 			} else {
+				$('#loader').hide();
 				console.log(error);
 			}
 		});
 
 		$('#button').click(function() {
 			myCourseContract.setInstructor($("#name").val(), $("#age").val());
+			$('#loader').show();
 		});
 	</script>
 </body>
