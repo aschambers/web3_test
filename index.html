@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" type="text/css" href="main.css">
+	<script src="./node_modules/web3.js/dist/web3.min.js"></script>
+</head>
+<body>
+	<div class="container">
+		<h1>Course Instructor</h1>
+		<h2 id="instructor"></h2>
+
+		<label for="name" class="col-lg-2 control-label">Instructor Name</label>
+		<input id="name" type="text">
+
+		<label for="name" class="col-lg-2 control-label">Instructor Age</label>
+		<input id="age" type="text">
+
+		<button id="button">Update Instructor</button>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+
+	<script type="text/javascript">
+		if (typeof web3 !== 'undefined') {
+			web3 = new web3(web3.currentProvider);
+		} else {
+			web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+		}
+
+		web3.eth.defaultAccount = web3.eth.accounts[0];
+		// this is the abi which you can copy paste from compile -> details -> abi, then copy to clipboard
+		var course_contract = web3.eth.contract([
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"name": "_fname",
+						"type": "string"
+					},
+					{
+						"name": "_age",
+						"type": "uint256"
+					}
+				],
+				"name": "setInstructor",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getInstructor",
+				"outputs": [
+					{
+						"name": "",
+						"type": "string"
+					},
+					{
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			}
+		]);
+		// if address is not in quotes, an error will occur.. web3.min.js:1 Uncaught Error: invalid address
+		// also need to npm install testrpc using.. npm install -g ethereumjs-testrpc
+		// type testrpc to run testrpc to provide you with 10 diferent accounts with private keys 
+		// you then need to attach in the remix browser by selecting web3 provider from the drop-down menu in the run tab
+		// in the real environment, this is not instantanious like in the test enviornment with remix browser
+		// the value is obtained by copy pasting the address of the contract in remix in the run tab after creating the contract
+		var myCourseContract = course_contract.at("0xf5948f47d838ac912c845a71d7f5df7d42fd30c8");
+		console.log(myCourseContract);
+
+		myCourseContract.getInstructor(function(error, result) {
+			if(!error) {
+				$('#instructor').html(result[0]+' ('+result[1]+' years old)');
+			} else {
+				console.log(error);
+			}
+		});
+
+		$('#button').click(function() {
+			myCourseContract.setInstructor($("#name").val(), $("#age").val());
+		});
+	</script>
+</body>
+</html>
