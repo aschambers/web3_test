@@ -8,58 +8,108 @@
 </head>
 <body>
 	<div class="container">
-		<h1>Course Instructor</h1>
-		<h2 id="instructor"></h2>
-		<img id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
 
-		<label for="name" class="col-lg-2 control-label">Instructor Name</label>
-		<input id="name" type="text">
+        <h1>Course Instructor</h1>
+        <!-- give us an instructor count -->
+        <span id="countIns"></span>
 
-		<label for="name" class="col-lg-2 control-label">Instructor Age</label>
-		<input id="age" type="text">
+        <h2 id="instructor"></h2>
+        <!-- hold a block hash associated with the latest event -->
+        <span id="insTrans"></span>
+        <hr>
 
-		<button id="button">Update Instructor</button>
-	</div>
+        <img id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
+
+        <label for="fName" class="col-lg-2 control-label">First Name</label>
+        <input id="fName" type="text">
+
+        <label for="lName" class="col-lg-2 control-label">Last Name</label>
+        <input id="lName" type="text">
+
+        <label for="age" class="col-lg-2 control-label">Instructor Age</label>
+        <input id="age" type="text">
+
+        <button id="button">Update Instructor</button>
+
+    </div>
 
 	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
 
 	<script type="text/javascript">
 		if (typeof web3 !== 'undefined') {
-			web3 = new web3(web3.currentProvider);
+			web3 = new Web3(web3.currentProvider);
 		} else {
 			web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 		}
 		// if we set this to anything other than 0, the contract creator, you won't be able to set an instructor.
-		web3.eth.defaultAccount = web3.eth.accounts[4];
+		web3.eth.defaultAccount = web3.eth.accounts[0];
 		// this is the abi which you can copy paste from compile -> details -> abi, then copy to clipboard
 		var course_contract = web3.eth.contract([
 			{
-				"constant": false,
+				"constant": true,
 				"inputs": [
 					{
-						"name": "_fname",
-						"type": "string"
-					},
-					{
-						"name": "_age",
-						"type": "uint256"
+						"name": "_address",
+						"type": "address"
 					}
 				],
-				"name": "setInstructor",
-				"outputs": [],
+				"name": "getInstructor",
+				"outputs": [
+					{
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"name": "",
+						"type": "bytes16"
+					},
+					{
+						"name": "",
+						"type": "bytes16"
+					}
+				],
 				"payable": false,
-				"stateMutability": "nonpayable",
+				"stateMutability": "view",
 				"type": "function"
 			},
 			{
 				"constant": true,
 				"inputs": [],
-				"name": "getInstructor",
+				"name": "getInstructors",
 				"outputs": [
 					{
 						"name": "",
-						"type": "string"
-					},
+						"type": "address[]"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [
+					{
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "instructorAccts",
+				"outputs": [
+					{
+						"name": "",
+						"type": "address"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "countInstructors",
+				"outputs": [
 					{
 						"name": "",
 						"type": "uint256"
@@ -70,18 +120,43 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
+				"constant": false,
+				"inputs": [
+					{
+						"name": "_address",
+						"type": "address"
+					},
+					{
+						"name": "_age",
+						"type": "uint256"
+					},
+					{
+						"name": "_fName",
+						"type": "bytes16"
+					},
+					{
+						"name": "_lName",
+						"type": "bytes16"
+					}
+				],
+				"name": "setInstructor",
+				"outputs": [],
 				"payable": false,
 				"stateMutability": "nonpayable",
-				"type": "constructor"
+				"type": "function"
 			},
 			{
 				"anonymous": false,
 				"inputs": [
 					{
 						"indexed": false,
-						"name": "name",
-						"type": "string"
+						"name": "fName",
+						"type": "bytes16"
+					},
+					{
+						"indexed": false,
+						"name": "lName",
+						"type": "bytes16"
 					},
 					{
 						"indexed": false,
@@ -89,7 +164,7 @@
 						"type": "uint256"
 					}
 				],
-				"name": "Instructor",
+				"name": "instructorInfo",
 				"type": "event"
 			}
 		]);
@@ -97,26 +172,44 @@
 		// also need to npm install testrpc using.. npm install -g ethereumjs-testrpc
 		// type testrpc to run testrpc to provide you with 10 diferent accounts with private keys 
 		// you then need to attach in the remix browser by selecting web3 provider from the drop-down menu in the run tab
+		// no.. change environment now to injected web3
 		// in the real environment, this is not instantanious like in the test enviornment with remix browser
 		// the value is obtained by copy pasting the address of the contract in remix in the run tab after creating the contract
-		var myCourseContract = course_contract.at("0x382162fe1401723081cffa3cb7c099dbf9dde926");
+		// the value is now from creating contract using metamask
+		var myCourseContract = course_contract.at("0x31ef2ef3956a79c3f18e48ea890c8f91d2f90453");
 		console.log(myCourseContract);
 
-		var InstructorEvent = myCourseContract.Instructor();
+		var instructorEvent = myCourseContract.instructorInfo({},'latest');
 
 		// watch event and update upon change in browser
-		InstructorEvent.watch(function(error, result) {
+		instructorEvent.watch(function(error, result) {
 			if(!error) {
-				$('#loader').hide();
-				$('#instructor').html(result.args.name + ' (' + result.args.age + ' years old)');
+				// if latest event does not match the block hash, hide the loader
+				if (result.blockHash != $("#instrans").html()) {
+					$('#loader').hide();
+				} else {
+					$("#insTrans").html('Block hash: ' +result.blockHash);
+					// changed the string types to byte types, so now need to use web3.toAscii to get the event result
+		        	$("#instructor").html(web3.toAscii(result.args.fName) + ' ' + web3.toAscii(result.args.lName) + ' (' + result.args.age + ' years old)');
+				}
 			} else {
 				$('#loader').hide();
 				console.log(error);
 			}
 		});
 
+		// get the number of instructors using res.c
+		myCourseContract.countInstructors((err, res) => {
+    		if (res) {
+        		$("#countIns").html(res.c + ' Instructors'); 
+    		} else {
+    			console.log(err);
+    		}
+		});
+
+		// when button is clicked, set the Instructor, but only if the contract creator
 		$('#button').click(function() {
-			myCourseContract.setInstructor($("#name").val(), $("#age").val(), function(err, response) {
+			myCourseContract.setInstructor(web3.eth.defaultAccount, $("#age").val(), $("#fName").val(),$("#lName").val(), function(err, response) {
 				if(err) {
 					$('#loader').hide();
 					console.log(error);
